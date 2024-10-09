@@ -1,0 +1,363 @@
+\documentclass{beamer}
+
+% Choose a theme
+\usetheme{Madrid}
+
+% Packages
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+
+% Title page details
+\title[Writing a WSGI Web Framework]{Writing a WSGI Web Framework from Scratch}
+\author{Mohammad "Kiyarash" Fazeli}
+\institute{Maktabkhooneh.org}
+\date{\today}
+
+\begin{document}
+
+% Title frame
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% Table of Contents
+\begin{frame}{Workshop Outline}
+    \tableofcontents
+\end{frame}
+
+% Section 1
+\section{Introduction and Historical Perspective}
+
+\begin{frame}{Introduction and Objectives}
+    \begin{itemize}[<+->]
+        \item Understand the evolution of Python web application deployment.
+        \item Learn the basics of WSGI and its importance.
+        \item Build a simple WSGI application.
+        \item Explore libraries that simplify development.
+        \item Examine popular frameworks' WSGI implementations.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Historical Methods of Running Web Code: CGI}
+	\textbf{CGI (Common Gateway Interface)}
+            \begin{itemize}[<+->]
+                \item Separate process per request.
+                \item High overhead, poor scalability.
+               	\item Code example
+            \end{itemize}
+\end{frame}
+
+\begin{frame}{Historical Methods of Running Web Code: mod\_python}
+	\textbf{mod\_python}
+		\begin{itemize}[<+->]
+			\item Apache module for Python.
+			\item Better performance but Apache-specific.
+			\item code
+		\end{itemize}
+		\textbf{FastCGI}
+		\begin{itemize}
+			\item Persistent processes.
+			\item Improved performance over CGI.
+		\end{itemize}
+\end{frame}
+
+\begin{frame}{Historical Methods of Running Web Code: FastCGI}
+	\textbf{FastCGI}
+	\begin{itemize}[<+->]
+		\item Persistent processes.
+		\item Improved performance over CGI.
+	\end{itemize}
+\end{frame}
+\begin{frame}{FastCGI vs. CGI: Architectural and Performance Differences}
+	\begin{itemize}[<+->]
+		\item \textbf{Process Lifetime}:
+		\begin{itemize}
+			\item \textbf{CGI}: Separate processes for each request
+			\item \textbf{FastCGI}: Long-lived, persistent processes
+		\end{itemize}
+		\item \textbf{Communication Mechanism}:
+		\begin{itemize}
+			\item \textbf{CGI}: Environment variables and I/O
+			\item \textbf{FastCGI}: Efficient binary protocol
+		\end{itemize}
+		\item \textbf{Concurrency}:
+		\begin{itemize}
+			\item \textbf{CGI}: Sequential, one-at-a-time
+			\item \textbf{FastCGI}: Concurrent request handling
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{FastCGI vs. CGI: Architectural and Performance Differences}
+	\begin{itemize}[<+->]
+		\item \textbf{Performance}:
+		\begin{itemize}
+			\item \textbf{CGI}: Slow process creation, limited resources
+			\item \textbf{FastCGI}: Faster request handling, efficient resource utilization
+		\end{itemize}
+		\item \textbf{Scalability}:
+		\begin{itemize}
+		\item Process Creation Overhead
+		\item Resource Utilization
+		\item Scaling Challenges
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Need for Standardization}
+    \begin{itemize}
+        \item Fragmentation in Python web development.
+        \item Incompatibilities between servers and applications.
+        \item Introduction of WSGI to provide a standard interface.
+    \end{itemize}
+\end{frame}
+
+% Section 2
+%\section{Case Study: Scaling Challenges}
+%
+%\begin{frame}{Case Study Overview}
+%    \begin{itemize}
+%        \item A web application facing scalability issues.
+%        \item Limitations with Django and Apache.
+%        \item High number of concurrent connections.
+%    \end{itemize}
+%\end{frame}
+%
+%\begin{frame}{Challenges Faced}
+%    \begin{itemize}
+%        \item \textbf{Django Limitations}
+%            \begin{itemize}
+%                \item Overhead not suitable for simple applications.
+%                \item Difficult to optimize for specific needs.
+%            \end{itemize}
+%        \item \textbf{Apache Limitations}
+%            \begin{itemize}
+%                \item Process/thread per connection.
+%                \item Resource-intensive under high load.
+%            \end{itemize}
+%    \end{itemize}
+%\end{frame}
+%
+%\begin{frame}{Solution: Custom WSGI Framework}
+%    \begin{itemize}
+%        \item Built a lightweight framework tailored to the application's needs.
+%        \item Improved performance and scalability.
+%        \item Greater control over resource management.
+%    \end{itemize}
+%\end{frame}
+
+% Section 3
+\section{Introduction to WSGI}
+
+\begin{frame}{What is WSGI?}
+    \begin{itemize}
+        \item \textbf{Web Server Gateway Interface}
+        \item A standard interface between web servers and Python web applications.
+        \item Defined in \href{https://www.python.org/dev/peps/pep-3333/}{PEP 3333}.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{WSGI Components}
+    \begin{itemize}
+        \item \textbf{Application Callable}
+        \item \textbf{\texttt{environ} Dictionary}
+        \item \textbf{\texttt{start\_response} Callable}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Benefits of WSGI}
+    \begin{itemize}
+        \item Promotes interoperability between frameworks and servers.
+        \item Simplifies deployment and scaling.
+        \item Encourages the development of middleware and reusable components.
+    \end{itemize}
+\end{frame}
+
+% Section 4
+\section{Building a Simple WSGI Application}
+
+\begin{frame}[fragile]{Hello World WSGI Application}
+    \textbf{Code Example:}
+    \begin{lstlisting}[language=Python]
+def application(environ, start_response):
+    status = '200 OK'
+    headers = [('Content-type', 'text/plain; charset=utf-8')]
+    start_response(status, headers)
+    return [b"Hello, World!"]
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}{Explanation of Components}
+    \begin{itemize}
+        \item \textbf{\texttt{environ}}: Contains request data.
+        \item \textbf{\texttt{start\_response}}: Starts the HTTP response.
+        \item \textbf{Return Value}: An iterable yielding the response body.
+    \end{itemize}
+\end{frame}
+
+% Section 5
+\section{Developing a Minimal Web Framework}
+
+\begin{frame}{Framework Structure}
+    \begin{itemize}
+        \item Organize code for scalability.
+        \item Separate concerns: routing, handling requests, generating responses.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Implementing URL Routing}
+    \textbf{Example Route Mapping:}
+    \begin{lstlisting}[language=Python]
+routes = {
+    '/': home_view,
+    '/about': about_view,
+}
+    \end{lstlisting}
+    \begin{itemize}
+        \item Map URLs to view functions.
+        \item Handle dynamic URLs with parameters.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Handling Requests and Responses}
+    \textbf{Manual Parsing:}
+    \begin{itemize}
+        \item Extract query parameters from \texttt{environ}.
+        \item Build response headers and body.
+    \end{itemize}
+\end{frame}
+
+% Section 6
+\section{Introducing WebOb and Werkzeug}
+
+\begin{frame}{Limitations of Pure Python Implementation}
+    \begin{itemize}
+        \item Complexity in parsing and handling data.
+        \item Potential security risks.
+        \item Reinventing the wheel.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Using WebOb}
+    \textbf{Code Example:}
+    \begin{lstlisting}[language=Python]
+from webob import Request, Response
+
+def application(environ, start_response):
+    request = Request(environ)
+    response = Response()
+    response.text = "Hello, World!"
+    return response(environ, start_response)
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Using Werkzeug}
+    \textbf{Code Example:}
+    \begin{lstlisting}[language=Python]
+from werkzeug.wrappers import Request, Response
+
+@Request.application
+def application(request):
+    return Response('Hello, World!')
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}{Benefits of Using Libraries}
+    \begin{itemize}
+        \item Simplify request and response handling.
+        \item Provide robust, tested components.
+        \item Save development time and reduce errors.
+    \end{itemize}
+\end{frame}
+
+% Section 7
+\section{Examining Popular Frameworks}
+
+\begin{frame}{Django's WSGI Implementation}
+    \begin{itemize}
+        \item Uses \texttt{wsgi.py} file.
+        \item \texttt{get\_wsgi\_application()} function sets up the application.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Flask's WSGI Integration}
+    \begin{itemize}
+        \item The Flask app object is a WSGI application.
+        \item Can access the underlying WSGI application via \texttt{app.wsgi\_app}.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Bottle's WSGI Approach}
+    \begin{itemize}
+        \item The default Bottle app is a WSGI application.
+        \item Simple and lightweight, ideal for small applications.
+    \end{itemize}
+\end{frame}
+
+% Section 8
+\section{Introduction to ASGI}
+
+\begin{frame}{What is ASGI?}
+    \begin{itemize}
+        \item \textbf{Asynchronous Server Gateway Interface}
+        \item Designed for asynchronous Python web applications.
+        \item Supports long-lived connections like WebSockets.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Why ASGI?}
+    \begin{itemize}
+        \item Modern web applications require asynchronous capabilities.
+        \item WSGI is synchronous and cannot handle async code efficiently.
+        \item ASGI enables high-performance async frameworks like FastAPI.
+    \end{itemize}
+\end{frame}
+
+% Section 9
+\section{Conclusion and Next Steps}
+
+\begin{frame}{Recap}
+    \begin{itemize}
+        \item Explored the evolution of Python web deployment.
+        \item Built a simple WSGI application and framework.
+        \item Introduced libraries to simplify development.
+        \item Examined popular frameworks' WSGI implementations.
+        \item Briefly discussed ASGI and asynchronous programming.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Additional Resources}
+    \begin{itemize}
+        \item \href{https://www.python.org/dev/peps/pep-3333/}{PEP 3333: WSGI Specification}
+        \item \href{https://asgi.readthedocs.io/en/latest/}{ASGI Documentation}
+        \item \href{https://werkzeug.palletsprojects.com/}{Werkzeug Documentation}
+        \item \href{https://docs.pylonsproject.org/projects/webob/en/stable/}{WebOb Documentation}
+    \end{itemize}
+\end{frame}
+
+% Section 10
+\section{Q\&A}
+
+\begin{frame}{Questions?}
+    \begin{center}
+        \Large Thank you for your attention!
+    \end{center}
+    \begin{center}
+        \normalsize Feel free to ask any questions.
+    \end{center}
+\end{frame}
+
+% Closing slide
+\begin{frame}{Contact Information}
+    \begin{itemize}
+        \item \textbf{Email}: your.email@example.com
+        \item \textbf{GitHub}: \href{https://github.com/yourusername}{github.com/yourusername}
+        \item \textbf{LinkedIn}: \href{https://www.linkedin.com/in/yourprofile/}{linkedin.com/in/yourprofile}
+    \end{itemize}
+\end{frame}
+
+\end{document}
+
